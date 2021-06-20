@@ -25,36 +25,22 @@ const init = database => {
     }
 
     const findAll = async() => {
-        const dbConn = await db.init(database)
-        const productDB = await db.queryOpenWithoutParams(dbConn, `SELECT * FROM products`)
-
-        const listIds = productDB.map(prod => prod.id)
-        const imgDB = await db.queryOpenWithoutParams(dbConn, `select * from images where product_id in (${listIds.join(',')}) group by product_id`)
-
-        const mapImgs = imgDB.reduce( (prev, curr) => {
-            return {
-                ...prev,
-                [curr.product_id]: curr
-            }
-        }, {})
-
-        const prods = productDB.map(prod => {
-            return {
-                ...prod,
-                images: mapImgs[prod.id]
-            }
-        })
-
-        return prods
-
+        const prods = await findAllPaginated({pageSize: 0, currentPage: 0})
+        return prods.data
     }
 
     const findAllPaginated = async({pageSize, currentPage}) => {
         const dbConn = await db.init(database)
-        const productDB = await db.queryOpen(dbConn, `SELECT * FROM products limit ${currentPage*pageSize}, ${pageSize+1}`)
+        let sqlProducts = `SELECT * FROM products` 
+        
+        if (pageSize > 0) {
+            sqlProducts +=` limit ${currentPage*pageSize}, ${pageSize+1}`
+        }
+
+        const productDB = await db.queryOpen(dbConn, sqlProducts)
         const hasNext = productDB.length > pageSize
 
-        if (hasNext) {
+        if (pageSize > 0 && hasNext) {
             productDB.pop()
         }
 
