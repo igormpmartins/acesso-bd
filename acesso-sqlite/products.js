@@ -23,15 +23,35 @@ const init = database => {
         const dbConn = await db.init(database)
         await db.queryRun(dbConn, `UPDATE products SET description = ?, price = ? WHERE id = ?`, [...data, id])
     }
+    
+    const updateCategories = async(id, categories) => {
+        const dbConn = await db.init(database)
+        await db.queryRun(dbConn, `DELETE FROM categories_products WHERE product_id = ?`, [id])
+
+        for await(cat of categories) {
+            await db.queryRun(dbConn, `INSERT INTO categories_products (product_id, category_id) VALUES (?,?)`,[id, cat])
+        }
+    }
 
     const findAll = async() => {
         const prods = await findAllPaginated({pageSize: 0, currentPage: 0})
         return prods.data
     }
 
-    const findAllPaginated = async({pageSize, currentPage}) => {
+    const findAllByCategory = async(category) => {
+        const prods = await findAllPaginated({pageSize: 0, currentPage: 0, category})
+        return prods.data
+    }
+
+    const findAllPaginated = async({pageSize, currentPage, category}) => {
         const dbConn = await db.init(database)
-        let sqlProducts = `SELECT * FROM products` 
+        let sqlProducts = `SELECT * FROM products p` 
+
+        if (category) {
+            sqlProducts +=` WHERE 
+                                EXISTS (SELECT * FROM categories_products c 
+                                        WHERE c.product_id = p.id AND c.category_id=${category})`
+        }
         
         if (pageSize > 0) {
             sqlProducts +=` limit ${currentPage*pageSize}, ${pageSize+1}`
@@ -69,8 +89,8 @@ const init = database => {
     }
 
     return {
-        create, addImage, update, remove, 
-        findAll, findAllPaginated
+        create, addImage, update, updateCategories, remove, 
+        findAll, findAllPaginated, findAllByCategory
     }
 
 }

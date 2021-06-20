@@ -28,8 +28,11 @@ const daoProducts = async() => {
     //await products.addImage(3, [4, 'Imagem 2', '777 2'])
     //await products.remove(4)
 
+    await products.updateCategories(4, [8])
+
     //const lista = await products.findAll()
-    const lista = await products.findAllPaginated({pageSize: 1, currentPage: 1})
+    const lista = await products.findAllByCategory(8)
+    //const lista = await products.findAllPaginated({pageSize: 2, currentPage: 0})
     console.log(lista)
 
     //const listaPg = await products.findAllPaginated({pageSize: 3, currentPage: 2})
