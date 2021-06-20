@@ -1,4 +1,5 @@
 const categories = require('./categories')('./banco.sqlite3')
+const products = require('./products')('./banco.sqlite3')
 
 const daoCategories = async() => {
 
@@ -17,4 +18,24 @@ const daoCategories = async() => {
 
 }
 
-daoCategories()
+const daoProducts = async() => {
+
+
+    //await products.create([4, 'Ibanez JEM DNA', 123])
+    //await products.update(4, ['Ibanez JEM DNA - update!', 555])
+    //await products.addImage(4, [2, 'Imagem 2', 'about:chrome'])
+    //await products.addImage(3, [3, 'Imagem 1', '777 1'])
+    //await products.addImage(3, [4, 'Imagem 2', '777 2'])
+    //await products.remove(4)
+
+    //const lista = await products.findAll()
+    const lista = await products.findAllPaginated({pageSize: 2, currentPage: 0})
+    console.log(lista.data)
+
+    //const listaPg = await products.findAllPaginated({pageSize: 3, currentPage: 2})
+    //console.log(listaPg)
+
+}
+
+//daoCategories()
+daoProducts()
