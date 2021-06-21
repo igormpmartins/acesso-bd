@@ -48,7 +48,7 @@ const init = db => {
         const conn = await db
         const [res] = await conn.query('select * from products')
 
-        const prodImgs = findImages(res)
+        const prodImgs = await findImages(res)
         return prodImgs
     }
 
@@ -56,7 +56,7 @@ const init = db => {
         const conn = await db
         const [res] = await conn.query(`select * from products 
                                         where id in (select product_id from categories_products where category_id = ${categoryId})`)
-        const prodImgs = findImages(res)
+        const prodImgs = await findImages(res)
         return prodImgs
     }
 
