@@ -10,13 +10,15 @@ const run = async() => {
     //const list = await categories.findAll()
     //console.log(list)
 
-    //await products.create(['Ibanez Universe', 123])
-    //await products.update(3, ['Ibanez Universe updt', 1234])
-    //await products.addImage(3, ['texto img', 'about:blank'])
+    //await products.create(['Ibanez RG550', 123])
+    await products.updateCategories(5, [1, 3, 5])
+
+    //await products.addImage(5, ['texto img RG550', 'about:blank'])
     //await products.remove(3)
 
     //const list = await products.findAll()
-    const list = await products.findAllByCategory(1)
+    //const list = await products.findAllByCategory(1)
+    const list = await products.findAllPaginated({pageSize: 2, currentPage: 1})
     console.log(list)
 
 }

@@ -14,6 +14,17 @@ const init = db => {
         const conn = await db
         await conn.query('UPDATE products SET description = ?, price = ? WHERE id = ?', [...data, id])
     }
+    
+    const updateCategories = async(productId, categories) => {
+        const conn = await db
+        await conn.query('DELETE FROM categories_products WHERE product_id = ?', [productId])
+
+        for await (categoryId of categories) {
+            await conn.query('INSERT INTO categories_products (product_id, category_id) VALUES (?, ?)', [productId, categoryId])
+        }
+
+    }
+
 
     const remove = async(id) => {
         const conn = await db
@@ -21,26 +32,33 @@ const init = db => {
     }
 
     const findImages = async(products) => {
-        const conn = await db
 
-        const listIds = products.map(item=>item.id).join(',')
-        const [imagesDB] = await conn.query(`select * from images where product_id in (${listIds})`)
+        if (products.length === 0) {
+            return products
+        } else {
 
-        const mapImages = imagesDB.reduce((prev, curr)=> {
-            return {
-                ...prev,
-                [curr.product_id]:curr
-            }
-        }, {})
+            const conn = await db
 
-        const productsImg = products.map(prod=> {
-            return {
-                ...prod,
-                images: mapImages[prod.id]
-            }
-        })
+            const listIds = products.map(item=>item.id).join(',')
+            const [imagesDB] = await conn.query(`select * from images where product_id in (${listIds})`)
 
-        return productsImg
+            const mapImages = imagesDB.reduce((prev, curr)=> {
+                return {
+                    ...prev,
+                    [curr.product_id]:curr
+                }
+            }, {})
+
+            const productsImg = products.map(prod=> {
+                return {
+                    ...prod,
+                    images: mapImages[prod.id]
+                }
+            })
+
+            return productsImg
+
+        }
 
     }
 
@@ -60,15 +78,34 @@ const init = db => {
         return prodImgs
     }
 
-    return {
+    const findAllPaginated = async({pageSize = 10, currentPage = 0} = {}) => {
+        const conn = await db
+        const sql = `select * from products limit ${pageSize * currentPage}, ${pageSize+1}`
+        const [res] = await conn.query(sql)
 
+        const hasNext = res.length > pageSize
+
+        if (hasNext) {
+            res.pop()
+        }
+
+        const prodImgs = await findImages(res)
+        return {
+            data: prodImgs,
+            hasNext
+        }
+
+    }
+
+    return {
         create,
         update,
+        updateCategories,
         remove,
         addImage,
         findAll,
+        findAllPaginated,
         findAllByCategory
-
     }
 
 }
