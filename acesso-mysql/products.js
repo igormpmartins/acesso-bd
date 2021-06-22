@@ -17,10 +17,21 @@ const init = db => {
     
     const updateCategories = async(productId, categories) => {
         const conn = await db
-        await conn.query('DELETE FROM categories_products WHERE product_id = ?', [productId])
 
-        for await (categoryId of categories) {
-            await conn.query('INSERT INTO categories_products (product_id, category_id) VALUES (?, ?)', [productId, categoryId])
+        await conn.query('START TRANSACTION')
+        try {
+
+            await conn.query('DELETE FROM categories_products WHERE product_id = ?', [productId])
+
+            for await (categoryId of categories) {
+                await conn.query('INSERT INTO categories_products (product_id, category_id) VALUES (?, ?)', [productId, categoryId])
+            }
+
+            await conn.query('COMMIT')
+
+        } catch (error) {
+            await conn.query('ROLLBACK')
+            console.log('rollback => ', error)
         }
 
     }
