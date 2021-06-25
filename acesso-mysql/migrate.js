@@ -45,9 +45,16 @@ const migrate = async() => {
     await initMigrate(conn)
 
     const currVersion = await getCurrentVersion(conn)
-    const targetVersion = 1
+    let targetVersion = 9999
+
+    if (process.argv.length > 2) {
+        if ((process.argv[2] === '--target-version') && process.argv[3] ) {
+            targetVersion = process.argv[3]
+        }
+    }
 
     const upgrade = targetVersion > currVersion
+    console.log(upgrade? 'upgrading to': 'downgrading to', 'version', targetVersion)
 
     const migrateFiles = fs.readdirSync('./migrations')
     const mapFiles = migrateFiles.map(file => {
@@ -97,6 +104,7 @@ const migrate = async() => {
 
     }
 
+    await conn.end()
 
 }
 
