@@ -45,7 +45,7 @@ const migrate = async() => {
     await initMigrate(conn)
 
     const currVersion = await getCurrentVersion(conn)
-    const targetVersion = 3
+    const targetVersion = 1
 
     const upgrade = targetVersion > currVersion
 
@@ -77,14 +77,21 @@ const migrate = async() => {
                 executed = true
             }
         } else {
-            if ((file.version <= currVersion) && (file.version >= targetVersion)) {
+            if ((file.version <= currVersion) && (file.version > targetVersion)) {
                 await m.down(conn)  
                 executed = true
             }
         }
 
-        if (executed)
-            await updateMigrate(conn, file.version)
+        if (executed) {
+            console.log('update to version', file.version)
+            let verUpd = file.version
+
+            if (!upgrade)
+                verUpd--
+
+            await updateMigrate(conn, verUpd)
+        }
 
         await conn.query(`COMMIT`)
 

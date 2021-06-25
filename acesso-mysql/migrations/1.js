@@ -41,7 +41,7 @@ const up = async(conn) => {
 const down = async(conn) => {
     console.log('version 1 - down')
 
-    await conn.query(`DROP TABLE categories_products;`)
+    await conn.query(`DROP TABLE categories_products`)
     await conn.query(`DROP TABLE images;`)
     await conn.query(`DROP TABLE products;`)
     await conn.query(`DROP TABLE categories;`)
