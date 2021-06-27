@@ -75,4 +75,3 @@ typings/
 # FuseBox cache
 .fusebox/
 *.local
-acesso-firestore/firestore.json
